@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Basic PHP Backend Test</title>
+    <!-- Load Tailwind CSS for modern styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom font for a clean look */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-blue-100 to-purple-200 flex items-center justify-center p-4">
+    <div class="bg-white p-8 rounded-xl shadow-2xl text-center max-w-md w-full border border-gray-200">
+        <h1 class="text-3xl font-extrabold text-gray-800 mb-6">
+            <span class="block text-blue-600">Frontend</span>
+            <span class="block text-purple-600">Backend</span>
+            Connection Test
+        </h1>
+
+        <p class="text-gray-600 mb-8">
+            Click the button below to fetch a "Hello World" message from your PHP script hosted on AeonFree.
+            <br><br>
+            <span class="font-semibold text-sm text-red-500">
+                (If running locally, "Failed to fetch" is expected due to browser security.
+                Please deploy this HTML to GitHub Pages for a proper test.)
+            </span>
+        </p>
+
+        <button
+            id="fetchMessageButton"
+            class="px-8 py-4 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold rounded-full shadow-lg hover:from-blue-600 hover:to-purple-700 focus:outline-none focus:ring-4 focus:ring-blue-300 focus:ring-opacity-75 transition-all duration-300 transform hover:scale-105"
+        >
+            Fetch Message from Backend
+        </button>
+
+        <!-- Area to display results -->
+        <div id="responseContainer" class="mt-8 p-4 rounded-lg bg-gray-50 border border-gray-200 hidden">
+            <p id="resultMessage" class="text-lg font-medium text-gray-800"></p>
+            <p id="errorMessage" class="text-lg font-medium text-red-600"></p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const fetchMessageButton = document.getElementById('fetchMessageButton');
+            const responseContainer = document.getElementById('responseContainer');
+            const resultMessage = document.getElementById('resultMessage');
+            const errorMessage = document.getElementById('errorMessage');
+
+            fetchMessageButton.addEventListener('click', async () => {
+                // Reset display
+                responseContainer.classList.add('hidden');
+                resultMessage.textContent = '';
+                errorMessage.textContent = '';
+                resultMessage.classList.remove('text-green-600', 'text-red-600'); // Clean up any previous color
+
+                // **IMPORTANT: This URL should be your working AeonFree domain for hello.php.**
+                const phpBackendUrl = 'https://pg513.iceiy.com/hello.php';
+
+                try {
+                    // Make the fetch request to your PHP backend
+                    const response = await fetch(phpBackendUrl);
+
+                    // Check if the HTTP response was successful (status code 200-299)
+                    if (!response.ok) {
+                        const errorText = await response.text(); // Get raw error text for debugging
+                        throw new Error(`HTTP error! Status: ${response.status} - ${response.statusText}. Response: ${errorText}`);
+                    }
+
+                    // Parse the JSON response
+                    const data = await response.json();
+
+                    // Display the message from the PHP backend
+                    if (data && data.message) {
+                        resultMessage.textContent = `Success: ${data.message}`;
+                        resultMessage.classList.add('text-green-600');
+                    } else {
+                        errorMessage.textContent = 'Error: Unexpected response format from backend.';
+                        errorMessage.classList.add('text-red-600');
+                    }
+
+                } catch (error) {
+                    // Handle any errors during the fetch operation (e.g., network issues, CORS problems)
+                    console.error('Fetch error:', error);
+                    errorMessage.textContent = `Failed to connect to backend: ${error.message}.
+                    This is often due to browser security restrictions when running HTML files directly from your computer.
+                    Please deploy this HTML to a web server (like GitHub Pages) and try again from the hosted URL.`;
+                    errorMessage.classList.add('text-red-600');
+                } finally {
+                    // Always show the response container, even for errors
+                    responseContainer.classList.remove('hidden');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
